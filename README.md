@@ -54,12 +54,25 @@ dependencies:
 pip install -r requirements.txt
 ```
 
-The hallucination scoring network runtime code is bundled with this repository.
-Put the released hallucination scoring checkpoint files in a checkpoint
-directory and pass that directory to the launcher.
-
 The DiFix weights are loaded through the Hugging Face model id
 `nvidia/difix_ref`.
+
+## Checkpoint
+
+The hallucination scoring network runtime code is bundled with this repository.
+Download the hallucination scoring checkpoint before running HAD:
+
+[ckpt_0000000000010000.pt](https://drive.google.com/file/d/1004LRTsUr0k1D42Ivcg2Q2Zbzjx2mVCg/view?usp=sharing)
+
+```bash
+mkdir -p checkpoints/LVSM_decoder_only_conf_Resi_unet_512
+# Download ckpt_0000000000010000.pt from the link above, then place it at:
+# checkpoints/LVSM_decoder_only_conf_Resi_unet_512/ckpt_0000000000010000.pt
+```
+
+Then pass that checkpoint directory to the launcher, or set `LVSM_CKPT_PATH` to
+the downloaded `.pt` file. SHA256:
+`dd272986eaded1eee8058af4cc619ec94c0dab320942e2549db6d1ea84a2acce`.
 
 ## Dataset Format
 
