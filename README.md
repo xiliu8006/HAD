@@ -1,6 +1,7 @@
 # HAD: Hallucination-Aware Diffusion Priors for 3D Reconstruction
 
-CVPR 2026
+Accepted to IEEE/CVF Conference on Computer Vision and Pattern Recognition
+(CVPR) 2026
 
 [Project Page](https://xiliu8006.github.io/HAD-Project-website/) |
 [Paper](https://arxiv.org/abs/2605.16873)
@@ -28,10 +29,6 @@ HAD combines:
 - A hallucination scoring network that predicts pixel-wise reliability maps.
 - Multi-sampling fusion that selects reliable pixels across multiple generated
   versions before supervising 3DGS.
-
-## News
-
-Our paper was accepted by CVPR 2026.
 
 ## Layout
 
