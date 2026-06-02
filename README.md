@@ -89,6 +89,14 @@ python scripts/summarize_had_eval_results.py \
   --step 19999
 ```
 
+## Acknowledgements
+
+This codebase is largely built on two excellent open-source projects:
+[Difix3D](https://github.com/nv-tlabs/Difix3D) and
+[LVSM](https://github.com/haian-jin/LVSM). We thank the authors for releasing
+their code. Our hallucination scoring network is based on modifications to the
+LVSM architecture.
+
 ## Citation
 
 If you find this codebase useful, please cite:
@@ -98,14 +106,8 @@ If you find this codebase useful, please cite:
   title={HAD: Hallucination-Aware Diffusion Priors for 3D Reconstruction},
   author={Liu, Xi and Sun, Weiwei and Ren, Zhou and Broaddus, Chris and Huang, Siyu and Guigues, Laurent},
   booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  month={June},
+  pages={29781--29791},
   year={2026}
 }
 ```
-
-## Acknowledgements
-
-This codebase is largely built on two excellent open-source projects:
-[Difix3D](https://github.com/nv-tlabs/Difix3D) and
-[LVSM](https://github.com/haian-jin/LVSM). We thank the authors for releasing
-their code. Our hallucination scoring network is based on modifications to the
-LVSM architecture.
