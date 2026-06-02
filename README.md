@@ -1,12 +1,37 @@
 # HAD: Hallucination-Aware Diffusion Priors for 3D Reconstruction
 
-This is our codebase for HAD training and evaluation.
-It keeps only the code needed to run the COLMAP/gsplat training pipeline with
-DiFix refinement and hallucination scoring network guidance.
+CVPR 2026
+
+[Project Page](https://xiliu8006.github.io/HAD-Project-website/) |
+[Paper](https://arxiv.org/abs/2605.16873)
+
+This repository contains the HAD training and evaluation code for sparse-view
+3D reconstruction with hallucination-aware diffusion priors.
+
+## Abstract
+
+Diffusion priors can improve sparse-view 3D reconstruction by augmenting
+training views at novel viewpoints, but they may also introduce hallucinated
+content that is inconsistent with the input images. HAD estimates pixel-wise
+hallucination score maps for diffusion-augmented views and uses these scores to
+mask unreliable pixels during 3D Gaussian Splatting optimization. The method
+also samples multiple diffusion refinements conditioned on different input views
+and fuses the most reliable pixels into the final augmented view.
+
+## Method Overview
+
+<img src="https://xiliu8006.github.io/HAD-Project-website/static/images/method_overview.png" alt="HAD method overview" width="100%">
+
+HAD combines:
+
+- Diffusion-based novel-view refinement from 3DGS-rendered views.
+- A hallucination scoring network that predicts pixel-wise reliability maps.
+- Multi-sampling fusion that selects reliable pixels across multiple generated
+  versions before supervising 3DGS.
 
 ## News
 
-We paper was accepted by CVPR 2026!
+Our paper was accepted by CVPR 2026.
 
 ## Layout
 
@@ -14,7 +39,7 @@ We paper was accepted by CVPR 2026!
 configs/                     Evaluation scene lists.
 examples/gsplat/             Training code, COLMAP dataset loader, and gsplat helpers.
 examples/gsplat/pycolmap/    Lightweight COLMAP binary parser used by the dataset loader.
-LVSM/                        Hallucination scoring network build on LVSM codebase
+LVSM/                        Hallucination scoring network built on LVSM codebase
 scripts/                     Result summarization utilities.
 slurm/                       Single-GPU shard launchers.
 src/                         DiFix pipeline wrapper.
