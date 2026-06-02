@@ -1,0 +1,37 @@
+model:
+  class_name: model.LVSM_scene_decoder_only_withconf_adaptor.Images2LatentScene
+
+  image_tokenizer:
+    image_size: 512
+    patch_size: 8
+    in_channels: 9  # 3 RGB + 3 direction + 3 Reference
+
+  target_pose_tokenizer:
+    image_size: 512
+    patch_size: 8
+    in_channels: 6  # 3 direction + 3 Reference
+  transformer:
+    d: 768
+    d_head: 64
+    n_layer: 24
+    special_init: true
+    depth_init: true
+    use_qk_norm: true
+
+training:
+  checkpoint_dir: checkpoints/LVSM_decoder_only_conf_Resi_unet_512
+  grad_checkpoint_every: 1
+  l2_loss_weight: 1.0
+  conf_loss_weight: 1.0
+  lpips_loss_weight: 0.0
+  perceptual_loss_weight: 0.0
+  use_ssim_loss: true
+  use_l1_norm_loss: false
+  num_input_views: 3
+  num_target_views: 2
+  num_views: 5
+  target_has_input: false
+
+
+inference:
+  if_inference: False

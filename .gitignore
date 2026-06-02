@@ -1,0 +1,66 @@
+# Python bytecode and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+build/
+dist/
+
+# Virtual environments and local config
+.env
+.env.*
+.venv/
+venv/
+env/
+*.local
+
+# Logs and scheduler output
+logs/
+*.log
+*.out
+*.err
+slurm-*.out
+
+# Experiment outputs and tracking
+/data/
+/datasets/
+/outputs/
+/results/
+/checkpoints/
+LVSM/checkpoints/
+LVSM/metric_checkpoint/
+wandb/
+runs/
+tb/
+tensorboard/
+mlruns/
+
+# Large model artifacts
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.onnx
+
+# Generated media/artifacts
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.ply
+
+# Notebook and test caches
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor, OS, and local agent notes
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+history/
