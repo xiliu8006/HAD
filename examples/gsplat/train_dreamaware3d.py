@@ -112,6 +112,7 @@ class Config:
     num_sparse_view: int = 9
     target_sample_step: int = 2
     view_fusion: int = 1
+    split_json: Optional[str] = None
 
     use_eval: bool = True
     use_pefect_conf: bool = True
@@ -355,17 +356,31 @@ class Runner:
 
         # num_sparse_view = 9
         num_sparse_view = self.cfg.num_sparse_view
+        split_json = cfg.split_json
+        if split_json is not None:
+            split_json = os.path.abspath(split_json)
+            if not os.path.isfile(split_json):
+                raise FileNotFoundError(f"Split json does not exist: {split_json}")
+            print(f"Using split json: {split_json}")
+
         self.trainset = Dataset(
             self.parser,
             split="train",
             patch_size=cfg.patch_size,
             load_depths=cfg.depth_loss,
             sparse_views=num_sparse_view,
-            partial_setting=cfg.partial_setting
+            partial_setting=cfg.partial_setting,
+            json_file=split_json,
         )
-        self.valset = Dataset(self.parser, split="val", sparse_views=num_sparse_view, partial_setting=cfg.partial_setting)
+        self.valset = Dataset(
+            self.parser,
+            split="val",
+            sparse_views=num_sparse_view,
+            partial_setting=cfg.partial_setting,
+            json_file=split_json,
+        )
         self.target = Dataset(self.parser, split="target", sparse_views=num_sparse_view, \
-                              target_sample_step=self.cfg.target_sample_step, partial_setting=cfg.partial_setting)
+                              target_sample_step=self.cfg.target_sample_step, partial_setting=cfg.partial_setting, json_file=split_json)
 
         self.scene_scale = self.parser.scene_scale * 1.1 * cfg.global_scale
         print("Scene scale:", self.scene_scale)

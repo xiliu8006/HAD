@@ -76,7 +76,15 @@ the downloaded `.pt` file. SHA256:
 
 ## Dataset Format
 
-Each scene should contain a Nerfstudio/COLMAP-style directory:
+This codebase supports two dataset layouts:
+
+- DL3DV evaluation scenes, selected with `DATASET=dl3dv`. This is the
+  default when `DATASET` is not set.
+- Mip-NeRF 360 scenes, selected with `DATASET=mipnerf360`.
+
+### DL3DV
+
+Each DL3DV scene should contain a Nerfstudio/COLMAP-style directory:
 
 ```text
 <DATA_ROOT>/<scene_id>/nerfstudio/
@@ -85,20 +93,62 @@ Each scene should contain a Nerfstudio/COLMAP-style directory:
   colmap/sparse/0/
 ```
 
-The default launcher expects scenes listed in `configs/had_eval_scenes.txt`.
+The default launcher expects scenes listed in `configs/dl3dv_eval_scenes.txt`.
+Override the data root with `DATA_ROOT=/path/to/DL3DV-10K-Benchmark` when your
+dataset is stored elsewhere.
+
+### Mip-NeRF 360
+
+Each Mip-NeRF 360 scene should be stored directly under the Mip-NeRF 360 data
+root:
+
+```text
+<MIPNERF_DATA_ROOT>/<scene>/
+  images/
+  images_4/
+  sparse/0/
+  train_test_split_<sparse_view>.json
+```
+
+The Mip-NeRF 360 training-view splits used by this code come from
+[Reconfusion](https://drive.google.com/drive/folders/10oT2_OQ9Sjh5wlfJQoGx2y7ZKYwpgNg5).
+Place the corresponding `train_test_split_<sparse_view>.json` file inside each
+scene directory before training.
+
+The Mip-NeRF 360 launcher uses scenes listed in `configs/mipnerf360_scenes.txt`.
+Set `DATASET=mipnerf360` to select this dataset. Override the data root with
+`MIPNERF_DATA_ROOT=/path/to/MipNeRF360` when needed.
 
 ## Run Evaluation
 
+Run DL3DV evaluation:
+
 ```bash
 ./run_had_eval_dataset.sh 24 9 /path/to/hallucination_scoring/checkpoint_dir
+```
+
+Run Mip-NeRF 360 evaluation:
+
+```bash
+DATASET=mipnerf360 \
+./run_had_eval_dataset.sh 9 9 /path/to/hallucination_scoring/checkpoint_dir
 ```
 
 The launcher skips scenes that already have `stats/val_step19999.json`.
 
 ## Run One Scene
 
+Run one DL3DV scene:
+
 ```bash
 ./run_train_scene.sh 093ef327b4e4f9d4ee52c02a354a53558a8652157fb0d58f3b4a708734afb334 9 20000
+```
+
+Run one Mip-NeRF 360 scene:
+
+```bash
+DATASET=mipnerf360 \
+./run_train_scene.sh garden 9 20000
 ```
 
 ## Run Hallucination Scoring Only
@@ -120,7 +170,7 @@ in the same convention used by the training COLMAP loader.
 ```bash
 python scripts/summarize_had_eval_results.py \
   --root /path/to/outputs/dreamaware3d_view9_fusion3 \
-  --scene-list configs/had_eval_scenes.txt \
+  --scene-list configs/dl3dv_eval_scenes.txt \
   --step 19999
 ```
 

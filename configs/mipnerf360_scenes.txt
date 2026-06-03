@@ -1,0 +1,9 @@
+bicycle
+bonsai
+counter
+flowers
+garden
+kitchen
+room
+stump
+treehill

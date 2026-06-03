@@ -66,7 +66,7 @@ def main():
     )
     parser.add_argument(
         "--scene-list",
-        default=str(REPO_ROOT / "configs" / "had_eval_scenes.txt"),
+        default=str(REPO_ROOT / "configs" / "dl3dv_eval_scenes.txt"),
         help="Optional expected scene list.",
     )
     parser.add_argument("--step", default="latest", help="'latest' or numeric step, e.g. 19999.")

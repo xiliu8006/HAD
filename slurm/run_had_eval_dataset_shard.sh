@@ -19,21 +19,46 @@ PROJECT_ROOT="${PROJECT_ROOT:-/home/xi9/code/DreamAware3D_open_source}"
 LVSM_ROOT="${LVSM_ROOT:-${PROJECT_ROOT}/LVSM}"
 DEFAULT_LVSM_CKPT_PATH="/home/xi9/code/LVSM/experiments/checkpoints/LVSM_decoder_only_conf_Resi_unet_512"
 LVSM_CKPT_PATH="${LVSM_CKPT_PATH:-${LVSM_CKPT_DIR:-${DEFAULT_LVSM_CKPT_PATH}}}"
-DATA_ROOT="${DATA_ROOT:-/project/siyuh/common/xiliu/DL3DV-10K-Benchmark}"
+DATASET="${DATASET:-dl3dv}"
+if [ "${DATASET}" = "mipnerf360" ]; then
+  DEFAULT_DATA_ROOT="${MIPNERF_DATA_ROOT:-/project/siyuh/common/xiliu/MipNeRF360}"
+  DEFAULT_SCENES_FILE="${PROJECT_ROOT}/configs/mipnerf360_scenes.txt"
+  DEFAULT_VIEW_FUSION=1
+  DEFAULT_MAX_STEPS=20000
+  DEFAULT_TARGET_SAMPLE_STEP=1
+else
+  DEFAULT_DATA_ROOT="/project/siyuh/common/xiliu/DL3DV-10K-Benchmark"
+  DEFAULT_SCENES_FILE="${PROJECT_ROOT}/configs/dl3dv_eval_scenes.txt"
+  DEFAULT_VIEW_FUSION=3
+  DEFAULT_MAX_STEPS=20000
+  DEFAULT_TARGET_SAMPLE_STEP=2
+fi
+DATA_ROOT="${DATA_ROOT:-${DEFAULT_DATA_ROOT}}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-/project/siyuh/common/xiliu/HAD_CVPR2026_V2/outputs}"
-SCENES_FILE="${SCENES_FILE:-${PROJECT_ROOT}/configs/had_eval_scenes.txt}"
+SCENES_FILE="${SCENES_FILE:-${DEFAULT_SCENES_FILE}}"
 
 SPARSE_VIEW="${SPARSE_VIEW:-9}"
-VIEW_FUSION="${VIEW_FUSION:-3}"
+VIEW_FUSION="${VIEW_FUSION:-${DEFAULT_VIEW_FUSION}}"
 USE_LVSM="${USE_LVSM:-1}"
 DATA_FACTOR="${DATA_FACTOR:-4}"
-MAX_STEPS="${MAX_STEPS:-20000}"
+MAX_STEPS="${MAX_STEPS:-${DEFAULT_MAX_STEPS}}"
+TARGET_SAMPLE_STEP="${TARGET_SAMPLE_STEP:-${DEFAULT_TARGET_SAMPLE_STEP}}"
+MIPNERF_SPLIT_ROOT="${MIPNERF_SPLIT_ROOT:-${DATA_ROOT}}"
+SPLIT_JSON="${SPLIT_JSON:-}"
 if [ "${USE_LVSM}" = "1" ]; then
-  METHOD_NAME="dreamaware3d_lvsm_view${SPARSE_VIEW}_fusion${VIEW_FUSION}"
+  if [ "${DATASET}" = "mipnerf360" ]; then
+    METHOD_NAME="dreamaware3d_mipnerf360_view${SPARSE_VIEW}_fusion${VIEW_FUSION}"
+  else
+    METHOD_NAME="dreamaware3d_lvsm_view${SPARSE_VIEW}_fusion${VIEW_FUSION}"
+  fi
   CONF_FLAG="--use_conf"
   LVSM_FLAG="--use_lvsm"
 else
-  METHOD_NAME="dreamaware3d_no_lvsm_view${SPARSE_VIEW}"
+  if [ "${DATASET}" = "mipnerf360" ]; then
+    METHOD_NAME="dreamaware3d_mipnerf360_no_lvsm_view${SPARSE_VIEW}"
+  else
+    METHOD_NAME="dreamaware3d_no_lvsm_view${SPARSE_VIEW}"
+  fi
   CONF_FLAG="--no-use_conf"
   LVSM_FLAG="--no-use_lvsm"
 fi
@@ -77,7 +102,13 @@ for IDX in "${!SCENES[@]}"; do
   fi
 
   SCENE_ID="${SCENES[IDX]}"
-  DATA="${DATA_ROOT}/${SCENE_ID}/nerfstudio"
+  if [ "${DATASET}" = "mipnerf360" ]; then
+    DATA="${DATA_ROOT}/${SCENE_ID}"
+    SCENE_SPLIT_JSON="${SPLIT_JSON:-${MIPNERF_SPLIT_ROOT:+${MIPNERF_SPLIT_ROOT}/${SCENE_ID}/train_test_split_${SPARSE_VIEW}.json}}"
+  else
+    DATA="${DATA_ROOT}/${SCENE_ID}/nerfstudio"
+    SCENE_SPLIT_JSON="${SPLIT_JSON}"
+  fi
   OUTPUT_DIR="${OUTPUT_ROOT}/${METHOD_NAME}/${SCENE_ID}"
   FINAL_STATS="${OUTPUT_DIR}/stats/val_step${FINAL_STEP}.json"
 
@@ -92,10 +123,22 @@ for IDX in "${!SCENES[@]}"; do
     continue
   fi
 
+  SPLIT_ARGS=()
+  if [ -n "${SCENE_SPLIT_JSON}" ]; then
+    if [ ! -f "${SCENE_SPLIT_JSON}" ]; then
+      echo "Skipping scene with missing split json: ${SCENE_SPLIT_JSON}" >&2
+      continue
+    fi
+    SPLIT_ARGS=(--split_json "${SCENE_SPLIT_JSON}")
+  fi
+
   mkdir -p "${OUTPUT_DIR}"
-  echo "Processing scene: ${SCENE_ID} rank=${RANK}/${WORLD_SIZE} use_lvsm=${USE_LVSM}"
+  echo "Processing scene: ${SCENE_ID} dataset=${DATASET} rank=${RANK}/${WORLD_SIZE} use_lvsm=${USE_LVSM}"
   echo "Data dir: ${DATA}"
   echo "Output dir: ${OUTPUT_DIR}"
+  if [ -n "${SCENE_SPLIT_JSON}" ]; then
+    echo "Split json: ${SCENE_SPLIT_JSON}"
+  fi
   if [ "${USE_LVSM}" = "1" ]; then
     echo "LVSM checkpoint path: ${LVSM_CKPT_PATH}"
   fi
@@ -112,8 +155,10 @@ for IDX in "${!SCENES[@]}"; do
       --no-lvsm_mode \
       --no-normalize-world-space \
       --num_sparse_view "${SPARSE_VIEW}" \
+      --target_sample_step "${TARGET_SAMPLE_STEP}" \
       --max_steps "${MAX_STEPS}" \
-      --view_fusion "${VIEW_FUSION}"; then
+      --view_fusion "${VIEW_FUSION}" \
+      "${SPLIT_ARGS[@]}"; then
     echo "Completed scene: ${SCENE_ID}"
   else
     STATUS="$?"
